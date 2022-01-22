@@ -1,0 +1,278 @@
+[작업과정]
+1. 서버를 켠다. 
+2. 브라우저에서 url을 입력하여 요청하도록 한다. 
+3. 결과는 서버, 콘솔, 브라우저 창등에서 확인한다. 
+
+[node 서버로 실행하기 ]
+const http = require('http');
+
+const hostname = '127.0.0.1';
+const port = 3000;
+
+const server = http.createServer((req, res) => {
+  res.statusCode = 200;
+  res.setHeader('Content-Type', 'text/plain');
+  res.end('Hello World');
+});
+
+server.listen(port, hostname, () => {
+  console.log(`Server running at http://${hostname}:${port}/`);
+});
+
+[실행]
+vs > ctrl+~ > node server.js
+브라우저 창에서 localhost
+? 질문 : http://localhost:3000/ 실행안되는 이유
+
+
+html 생성 후 데이터 베이스에 저장된 파일 읽어 화면에 뿌리기 
+서버를 이용해 데이터 연동하는 과정
+
+[요청]
+1. var xhr = new XMLHttpRequest();
+// 서버에 요청객체 생성
+- XMLHttpRequest개체의 멤버
+프로퍼티틀
+- responseText : 응답본체를 text로 취득
+- response : 응답본체
+- readyState :HTTP 통신 상태 취득
+- responseType : 응답 타입
+- responseXML : 응답본체를 XML로 취득
+- status : http 상태코드를  취득
+- statusText : http 상태메시지를  취득
+- onreadystatechange : 통신 상태가 변화하면 호출된다.
+메소드들
+- abort() : 비동기 통신 중단
+- open() : http 요청 초기화
+- send() : 요청을 송신
+
+2. xhr.open('GET','/');
+// 요청을 준비
+// http 메서드, 요청을 처리하는 URL, 비동기처리할 것인지 지정
+
+3. xhr.send();
+// 준비된 요청을 전달 
+
+
+
+
+[응답]
+1. window.onload = function(){ }
+// 브라우저가 서버로부터 응답을 받으면 onload이벤트가 발생하고 
+// onload이벤트가 발생하면 함수가 호출된다.
+2. 서버의 응답이 정상인지 확인 
+xhr.status 리턴 종류
+200 : ok, 처리성공
+401 : Unauthorized, 인증필요
+403 : Forbidden, 액세스 거부
+404 : Not Found, 리퀘스트된 자원이 존재하지 않음
+500 : Internal Server Error, 내부서버에러
+503 : Sevice Unavailable, 요구한 서버 이용불가
+
+xhr.readyState 상태 리턴종류
+ readyState == 0  open 메소드가 호출되지 않음 
+ readyState == 1  open 메소드가 호출했지만 send 메소드는 호출되지 않음 
+ readyState == 2  로드 완료, send 메소드는 호출되었지만 응답상태는 미취득
+ readyState == 3  현재 응답이 전송 처리중 상태로 일부 응답은 취득
+ readyState == 4  현재 응답이 완전히 도착 한 후 상태, 모든 데이타 취득 완료
+
+3. xhr.onreadystatechange
+서버에서 응답이 도착하면 특정한 자바스크립트 함수를 호출할 수 있는것이 onreadystatechange이다. 
+onreadystatechange라는 말은 XMLHTTP의 상태(readystate)가 변경될 때 마다(on change)라는 의미이다.
+
+
+[ 첫번째 테스트 : myList.html ]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="myBox"></div>
+    <script>  
+        window.onload = function(){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/');
+            xhr.onreadystatechange = function(){
+                var res = 'myTest';
+                document.getElementById('myBox').textContent = res; 
+                // 요청과 응답 관련처리를 작성하는 곳
+            }
+            xhr.send();
+        }
+        var res = xhr.responseText;
+    </script>
+</body>
+</html>
+
+[간단한 res 처리 서버 만들기]
+server.get('/views/*', (req,res)=>{
+    res.sendFile(__dirname + req.url);
+})
+
+
+[파일 요청방식 ]
+-get
+-post
+
+[실행]
+vs > ctrl+~ > node server.js
+브라우저 창에서 localhost/views/myList.html
+
+////////////////////////////////////////////////////////////////////////////
+[서버의 상태 확인 해보기 ]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <button onclick="stateCheck()"> click </button>
+    <script>
+        function stateCheck(){
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function(){
+                console.log( xhr.readyState )
+            }
+            xhr.open('get', 'text.txt')
+            xhr.send();
+        }
+    </script>
+</body>
+</html>
+
+[실행]
+test.txt파일과 함께 업로드 후 
+ 브라우저에서 jemicomit.dothome.co.kr/test01.html 실행 
+f12 콘솔창 확인하기 
+
+test.txt 파일을 text.txt로 이름 변경 후 
+f12 콘솔창 확인하기 
+
+/////////////////////////////////////////////////////////////////////////////////
+[express 서버 만들기 ]
+const express = require('express')
+const server = express()
+
+server.get('/', async(req, res)=>{
+    res.send('hello')
+});
+
+[실행]
+vs > ctrl+~ > node server.js
+브라우저 창에서 localhost
+? 질문 : http://localhost:3000/ 실행안되는 이유
+
+///////////////////////////////////////////////////////////////////////////////
+[데이터베이스 연동하는 서버만들기]
+const mariadb = require('mariadb');
+const pool = mariadb.createPool({
+    host:'127.0.0.1',
+    user:'root', 
+    database:'study',
+    password:'12345',
+    connectionLimit:5
+})
+
+server.get('/', async(req, res)=>{
+    let conn;
+    try{
+        conn = await pool.getConnection();
+        const query = 'select * from user_info';
+        const rows = await conn.query(query);
+        res.json(rows);
+
+        console.log(rows);
+    }catch(err){
+        throw err;
+    }finally{
+        if(conn){
+            conn.end();
+        }
+    }
+    //res.send('hello')
+});
+
+server.get('/*', (req,res)=>{
+    // 로걸주소 확인하기
+    res.sendFile(__dirname + req.url);
+})
+
+
+[데이터베이스 내용 출력하기 : user-list.html]
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="rDiv"></div>
+    <script>
+        window.onload = function(){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET','/');
+            //xhr.open('GET','http://localhost');
+            xhr.onreadystatechange = function(){
+                var res = JSON.parse(xhr.responseText);
+                var html = '';
+                for( var user of res){
+                    html += `<li>번호 : ${user.ui_num}, 아이디 :${user.ui_id}`
+                    /* react문자열 결합인 경우 
+                    작은 따옴표사용이 아니라 ~틸드 아래 `따옴표를 사용해야 함  
+                    ES6는 템플릿 리터럴(Template literal)이라고 불리는 새로운 문자열 표기법을 도입하였다. 
+                    템플릿 리터럴은 일반 문자열과 비슷해 보이지만, ‘ 또는 “ 같은 통상적인 따옴표 문자 대신 백틱(backtick) 문자 `를 사용한다.
+                    */
+                }
+                html += '</ul>';
+                document.querySelector('#rDiv').innerHTML = html;
+            }
+            xhr.send();
+        }
+    </script>
+</body>
+</html>
+
+[실행]
+vs > ctrl+~ > node server.js
+브라우저 창에서 http://localhost/views/user-list.html
+
+[nodemon 설치]
+서버를 수정 후 다시 재부팅하려면 불편하므로 
+nodemon 설치하여 서버가 알아서 리프래시 되도록 한다. 
+vs > ctrl+~ > npm install nodemon --save-dev
+
+[실행]
+vs > ctrl+~ > nodemon server.js
+//////////////////////
+server.post('/login', async(req,res)=>{
+    //  console.log(req.params);
+      console.log(req.body); // 아래 values 받아오기 
+    //  console.log(req.query); //아래  rows 받아오기
+
+    let conn;
+    try{ 
+        conn = await pool.getConnection();
+        const query = 'select * from user_info where ui_id=? and ui_pwd=?';
+        const values = [req.body.id, req.body.pwd];
+        const rows = await conn.query(query, values);
+        console.log(rows);
+        res.json(rows);
+    }catch(err){
+        throw err;
+    }finally{
+        if(conn){
+            conn.end();
+        }
+    }
+})
+
+
+http://localhost/goods?gi_name=1&gi_num=10&gi_num=9

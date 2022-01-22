@@ -1,0 +1,27 @@
+const fs = require('fs');
+const http = require('http');
+const server = http.createServer();
+const PORT = process.env.PORT || 3000;
+let path = require('path');
+
+server.listen(PORT,  function(){
+    console.log(`start server ${PORT}`);
+})
+
+// 요청 이벤트 처리
+server.on('request', function(req, res){
+// on 노드의 이벤트 처리 방식
+   
+    // http는 send를 갖고 있지 않으므로 if 처리 
+    if(req.url === '/'){
+        // localhost:3000 정상 동작
+        
+        res.statusCode = 200;
+        res.setHeader('Content-Type', 'text/html');
+        path = path.join(__dirname, 'view', 'index.html');
+        // view 폴더인지 views 폴더인지 확인하고 사용할 것 
+        fs.readFile(path, 'utf-8', (err, data)=>{
+            res.end(data);
+        })
+    }
+})

@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>로그인 테스트</title>
+	</head>
+<body>
+	<h1>public</h1>
+	<br>
+	<form method="post" action="/process/login">
+		<table>
+			<tr>
+				<td><label>아이디</label></td>
+				<td><input type="text" name="id" id="id" onchange="changeValue('id', this.value)"/></td>
+			</tr>
+			<tr>
+				<td><label>비밀번호</label></td>
+				<td><input type="password" name="password" id="password" onchange="changeValue('password', this.value)"/></td>
+			</tr>
+		</table>
+		<button onclick="login()"> 로그인</button>
+	</form>
+	<script>
+		console.log( window.variable = 9);
+		// 윈도우 전역변수 즉시 실행 
+		
+		function changeValue( variable, value){
+			// 데이타입력시 콘솔창에 출력하는 함수로 데이터 입력후 하단의 콘솔창 확인 
+			// 아이디 비밀번호 각각 확인 
+				window[variable] = value; 
+				console.log( window[variable]);
+		}
+		function login(){
+			var param = { 
+				// input으로 입력 받은  id 값이 있으므로 객체화 할 수 있음 
+				id:id,
+				pwd:password
+			}
+			//console.log( param);
+			fetch("/login",{
+				method:'POST',
+				headers:{
+					'Content-Type':'appliction/json',
+				},
+				body:JSON.stringify(param),
+			});
+			// let xhr = new XMLHttpRequest();	
+			// xhr.open('POST', 'login');
+			// xhr.onreadystatechange = function(){
+			// 	console.log(xhr.readyState)
+			// 	if(xhr.readyState == 4 && xhr.state == 200){
+			// 		console.log( xhr.responseText);
+			// 	}
+			// }
+			// xhr.setRequestHeader('content-type', 'appliction/json');
+			// xhr.send(JSON.stringify(param));
+			// //xhr.sendFile('<h1>로그인</h1>')
+		}
+	</script>
+</body>
+</html>
+
+
+<!-- 서버 
+
+const express = require('express');
+const path = require('path');
+
+// Express의 미들웨어 불러오기
+const bodyParser = require('body-parser');
+const static = require('serve-static');
+
+const app = express();
+app.use(static(path.join(__dirname, 'public')));
+
+// 기본 속성 설정
+app.set('PORT', process.env.PORT || 3000);
+
+// body-parser를 이용해 application/x-www-form-urlencoded 파싱
+app.use(bodyParser.urlencoded({ extended: false }))
+
+// body-parser를 이용해 application/json 파싱
+app.use(bodyParser.json())
+
+app.get('/login', (req, res)=>{
+    res.sendFile(req.url)
+})
+
+// 미들웨어에서 파라미터 확인
+app.use('/*',(req, res)=>{
+	console.log('첫번째 미들웨어에서 요청을 처리함.');
+
+	const paramId = req.body.id || req.query.id;
+	const paramPassword = req.body.password || req.query.password;
+	
+   
+	// res.writeHead('200', {'Content-Type':'text/html;charset=utf8'});
+	// res.write('<h1>Express 서버에서 응답한 결과입니다.</h1>');
+	// res.write('<div><p>Param id : ' + paramId + '</p></div>');
+	// res.write('<div><p>Param password : ' + paramPassword + '</p></div>');
+	// res.send('<div><p>Param password : ' + paramId + '</p></div>');
+	// res.end();
+});
+
+
+app.listen(app.get('PORT'), function(){
+  console.log('Express server ' + app.get('PORT'));
+});
+
+
+ -->

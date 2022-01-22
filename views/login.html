@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form method="post" action="/process/login">
+		<table>
+			<tr>
+				<td><label>아이디</label></td>
+				<td><input type="text" name="id" id="id" onchange="changeValue('id', this.value)"/></td>
+			</tr>
+			<tr>
+				<td><label>비밀번호</label></td>
+				<td><input type="password" name="password" id="password" onchange="changeValue('password', this.value)"/></td>
+			</tr>
+		</table>
+		<button onclick="login()"> 로그인</button>
+	</form>
+	<script>
+		function changeValue(variable, value){
+			 window[variable] = value; 
+			 console.log( window[variable]);
+		}
+		function login(){
+			const param = { 
+				id:id,
+				pw:password
+			}
+			console.log(';;;')
+		}
+	</script>
+</body>
+</html>
