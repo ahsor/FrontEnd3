@@ -1,35 +1,41 @@
-const express = require('express');
-const path = require('path');
-const app = express();
-const static = require('serve-static');
+const http = require('http');
+const server = http.createServer();
+
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, function() {
+  console.log('server start', PORT);
+});
+
+ var opts = {
+     host: 'www.google.com',
+     port: 80,
+     method: 'POST',
+     path: '/',
+     headers: {}
+ };
+ 
+ var resData = '';
+ var req = http.request(opts, function(res) {
+   // 응답 처리
+   res.on('data', function(chunk) {
+     resData += chunk;
+   });
+   
+   res.on('end', function() {
+     console.log(resData);
+   });
+ });
+ 
+ opts.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+ req.data = "q=actor";
+ opts.headers['Content-Length'] = req.data.length;
+ 
+ req.on('error', err=> console.log('ERROR' + error.message));
+ 
+ // 요청 전송
+ req.write(req.data);
+ req.end();
+ 
 
 
-app.set('PORT', process.env.PORT || 3000);
-//app.use('/public', path.join(__dirname, '/public')); // error
-app.use(static(path.join(__dirname, 'public')));
-
-// 분리한 라우트 연결
-const home = require('./routes/home');  // 라우트
-app.use( '/', home); // 모듈
-
-/* 라우트로 분리하여 깔끔하게 정리 
-app.get('/', (req, res)=>{
-    console.log( 'router root ')
-    res.sendFile(req.url);
-})
-
-app.get('/login', (req, res)=>{
-    console.log( 'router login ')
-    res.sendFile(req.url);
-})
-*/
-const bodyParser = require('body-parser');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended:true}));
-// url을 통해 들어온 공백, 한글등 문자가 포함될 경우 인식을 원할히 할수 있도록 함 
-
-app.listen( app.get('PORT'), ()=>{
-    console.log('server start' , app.get('PORT'));
-})
-
-
+ 
