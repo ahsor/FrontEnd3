@@ -186,7 +186,6 @@ app.listen(app.get('PORT'), function(){
 // Express 기본 모듈 불러오기
 const express = require('express');
 const app = express();
-//const PORT = process.env.PORT || 3000;
 
 app.set( 'PORT', process.env.PORT || 3000);
 // 포트 지정을 함 
@@ -204,30 +203,8 @@ app.get('/', (req, res)=>{
 ```
 
 ### 객체 응답
-```
-// Express 기본 모듈 불러오기
-const express = require('express');
-const app = express();
-//const Person = {name:'kim', age:20};
-// 객체 또는 객체 배열 반환
-const Person = [{name:'kim', age:20},{name:'hong', age:20},{name:'park', age:20} ];
-app.set( 'PORT', process.env.PORT || 3000);
-
-app.get('/', (req, res)=>{
-    // 요청이 들어 오면 응답 
-    res.send(Person);
-})
-// Express 서버 시작
-app.listen( app.get('PORT'), ()=>{
-    console.log('express server start');
-});
-```
-
-### path는 지정만 하면 express 가 알아서 함
+path는 지정만 하면 express 가 알아서 함
 root 경로와 login 경로를 브라우저 주소창에서 확인 할것 
-http://localhost:3000/
-http://localhost:3000/login
-
 ```
 const express = require('express');
 const app = express();
@@ -237,16 +214,67 @@ app.set( 'PORT', process.env.PORT ||  3000 );
 app.listen( app.get('PORT'), ()=>{
     console.log('server start');
 })
+const PersonAry = [{name:'kim', age:20},{name:'hong', age:20},{name:'park', age:20} ];
 
-app.get('/', async (req, res)=>{
-    res.send('root');
+// http://localhost:3000/ob 요청
+const PersonOB = {name:'kim', age:20};
+app.get('/ob', (req, res)=>{
+    // 요청이 들어 오면 응답 
+    res.send(PersonOB);
+})
+// http://localhost:3000/login/ary 요청
+app.get('/ary', (req, res)=>{
+    // 요청이 들어 오면 응답 
+    res.send(PersonAry);
 })
 
+//http://localhost:3000/ 요청
+app.get('/', async (req, res)=>{
+    res.send('root');
+    // 문자열 전송
+})
+
+//http://localhost:3000/login 요청
 app.get('/login', async (req, res)=>{
     res.send('login');
 })
-
 ```
+# 링크와 이름으로 요청 
+```
+const express = require('express');
+const app = express();
+app.set('PORT', process.env.PORT || 3000);
+
+// localhost:3000/login 접속
+app.get('/login', async (req, res)=> {
+  res.send('<a href="/goods"> goods 로 가기</a>');
+  // 헤더 처리 없이도 한글도 안깨지고
+})
+
+// localhost:3000/goods 접속
+app.get('/goods', async (req, res)=> {
+  res.send('<a href="/login">login 하세요</a>');
+})
+
+// 이름으로 접속 할 수도 있음
+// localhost:3000/login/이름 접속
+app.get('/login/:name', async (req, res)=> {
+  res.send('<H1>' + req.params.name + ', Hello !</H1>')
+})
+
+//라우팅에 첫번째 매개변수에 전체 선택자 ( * ) 을 사용할 수 있다.
+//라우팅은 순서대로 요청을 확인함으로 가장 마지막에 위치해두면 없는 페이지에 접속했을 경우를 대비할 수 있다.
+app.get('/*', function (req, res) {
+  res.status(404).send('<H1> 404 ERROR </H1>');
+  //res.status(403).send('Forbidden');
+})
+
+
+app.listen(app.get('PORT'), async() => {
+  console.log(`Server is Running at ${app.get('PORT')}`);
+})
+```
+
 
 ### html 문서 응답
 ```
@@ -266,30 +294,12 @@ app.get('/', (req, res)=>{
             <title>Document</title>
         </head>
         <body>
-            연습용 테스트 문서 
+            <h1>루트</h1>
         </body>
     </html>
     `;
     res.send(reString);
-})
-// Express 서버 시작
-app.listen( app.get('PORT'), ()=>{
-    console.log('express server start');
 });
-
-```
-
-### login 경로로 요청과 응답
-```
-// Express 기본 모듈 불러오기
-const express = require('express');
-const app = express();
-app.set( 'PORT', process.env.PORT ||  3000 );
-
-app.get('/', (req, res)=>{
-    // 요청이 들어 오면 응답 
-    res.send('This is root');
-})
 
 app.get('/login', (req, res)=>{
     // login 요청이 들어오면 할일 
@@ -314,8 +324,9 @@ app.listen( app.get('PORT'), ()=>{
 });
 ```
 
-### 파일로 응답 
+### 파일로 응답 : 현재 폴더
 ```
+// 현재 폴더 아래에 index.html, login.html 제작
 const express = require('express');
 const app = express();
 
@@ -325,14 +336,14 @@ app.listen( app.get('PORT'), ()=>{
     console.log('server start');
 })
 
+// http://localhost:3000/  요청
 app.get('/', async (req, res)=>{
-    console.log(__dirname); // 현재 폴더
-    console.log(req.url); // 요청 쿼리  / 출력 
     res.sendFile(__dirname + req.url);
     // 서버와 같은 폴더에 index.html 생성 
     // **index.html은 자동 인식 **
 })
 
+// http://localhost:3000/login 요청
 app.get('/login', async (req, res)=>{
     console.log(req.url); // 요청 쿼리  /login 출력 
     res.sendFile(__dirname + req.url + '.html');
@@ -341,51 +352,39 @@ app.get('/login', async (req, res)=>{
 
 ```
 
-
-### view 단으로 분리 
+### file로 응답 : view 단으로 분리 
 MVC 모델
-
+현재 폴더 아래에 view 폴더 만든 후 index.html, login.html 제작
 ```
-// 현재 폴더 아래에 view 폴더 생성 후 index.html, login.html을 이동
+// 현재 폴더 아래에 view 폴더 만든 후 index.html, login.html 제작
 const express = require('express');
 const app = express();
+const path = require('path');
+app.set( 'PORT', process.env.PORT ||  3000 );
 
 app.listen( app.get('PORT'), ()=>{
     console.log('server start');
 })
 
 app.get('/', async (req, res)=>{
-    res.sendFile(__dirname + '/view' + req.url);
+    res.sendFile(__dirname + '/views' + req.url);
     // 너무 지저분함 
-})
-
-app.get('/login', async (req, res)=>{
-    res.sendFile(__dirname + '/view' + req.url + '.html');
-    console.log(__dirname + '/view' + req.url + '.html');
-    // / \ // \\ 를 구분하지 못하는 문제 발생
-})
-```
-
-## path 모듈을 이용한 view 분리
-path는 node의 내장 모듈이므로 별도 설치 없이 바로 추출하여 사용할 수 있다.
-
-```
-app.get('/', async (req, res)=>{
-    //res.sendFile(__dirname + '/view' + req.url);
-    console.log(path.join(__dirname , '/view', req.url));    // D:\node\view\
-    console.log(path.join(__dirname , '/view') + req.url);   // D:\node\view/
+    
+   // res.sendFile(path.join(__dirname , '/views')+ req.url);
+    // path를 사용한다 해서 경로가 편하지는 않음
+	// path를 사용할 때 /와 /login 경로 설정이 다름
     // req.url 하면 경로는 인식하지만 index.html 을 자동으로 인식하지는 않음 
     // 때문에 자동 인식하도록 해주어야 함 
-
-    res.sendFile(path.join(__dirname , '/view')+ req.url);
 })
 
 app.get('/login', async (req, res)=>{
-    res.sendFile(path.join(__dirname , '/view', req.url) + '.html');
-    console.log(path.join(__dirname , '/view', req.url) + '.html');
+    res.sendFile(__dirname + '/views' + req.url + '.html');
+    console.log(__dirname + '/views' + req.url + '.html');
+    // / \ // \\ 를 구분하지 못하는 문제 발생
+    //res.sendFile(path.join(__dirname , '/views', req.url) + '.html');
+    console.log(path.join(__dirname , '/views', req.url) + '.html');
     //경로가 있다면 req.url이 파일명이든 경로명이든 상관 없이 사용할 수 있음 
 })
-
 ```
 
 ### path 모듈 사용법 : 다음 use로 넘거갈 것 
@@ -464,9 +463,125 @@ console.log(path.resolve(__dirname, '/a/b', '..', './b', 'c', '/d'));
  
 ```
 
+## 1. get() : 익스프레스 요청과 응답
+|메소드 이름 |설명|
+|---|---|
+|send([body]) | 클라이언트에 응답을 보낸다. 데이터는 html, buffer, JSON배열, JSON객체|
+|status(code) | http 상태 코드를 반환 |
+|sendStatus(code) | http 상태 코드를 반환, 상태메시지와 함께 전송 |
+|redirect | 웹페이지 경로를 강제로 이동 |
+|render( view, [local], [callback]) | 뷰엔진을 사용하여 문서를 만든 후 전송 |
+
+
+## 상태코드 : status 리턴 종류
+|코드 |설명|
+|---|---|
+|200 | ok, 처리성공 |
+|401 | Unauthorized, 인증필요|
+|403 | Forbidden, 액세스 거부|
+|404 | Not Found, 리퀘스트된 자원이 존재하지 않음|
+|500 | Internal Server Error, 내부서버에러|
+|503 | Sevice Unavailable, 요구한 서버 이용불가|
+
+## express use() 
+- path을 불편함도 해결할 수 있고
+- get, post, put, delete 등 다양한 처리가 가능 하고 
+- express는 static 등 다양한 미들웨어를 포함하고 있고 
+- 라우팅 기능도 내장 하고 있고
+.get() 특정패스로 요청된 query를 실행하지만 use() 미들웨어를 사용하는 것임 
+노드에서는 웹 요청과 응답에 관한 정보를 사용해 필요한 처리를 진행할 수 있도록 함수를 분리하며 use()에 등록해 두면 클라이언트 요청에 따라 알아서 use()가 처리함
+
+http://expressjs.com/ko/guide/using-middleware.html
+
+/를 "마운트"경로로 지정하면 app.use()는 /로 시작하는 모든 요청에 응답한다.
+GET /
+PUT /foo
+POST /foo/bar
+기타
+
+반면 app.get()는 Express 'application routing'의 일부이며 
+GET HTTP 동사로 요청 될 때 특정 경로를 일치시키고 처리하기위한 것.
+GET /
+
+
+|메서드|	설명|
+|---|---|
+|get(path, callback, callback...)|	GET 요청이 발생했을 때의 이벤트 리스너|
+|post(path, callback, callback...)	|POST 요청이 발생했을 때의 이벤트 리스너|
+|put(path, callback, callback...)	|put 요청이 발생했을 때의 이벤트 리스너|
+|delete(path, callback, callback...)	|delete 요청이 발생했을 때의 이벤트 리스너|
+|all(path, callback, callback...)	|all 요청이 발생했을 때의 이벤트 리스너|
+
+# use()가 자동으로 get() 으로 동작하고 
+express 에서 사용하는 요청객체와 응답객체는 http 모듈에서 사용하는 객체와 같다. 
+```
+const express = require('express');
+const app = express();
+
+app.set( 'PORT', process.env.PORT ||  3000 );
+
+app.listen( app.get('PORT'), ()=>{
+    console.log('server start');
+})
+const PersonAry = [{name:'kim', age:20},{name:'hong', age:20},{name:'park', age:20} ];
+
+// http://localhost:3000/ob 요청
+const PersonOB = {name:'kim', age:20};
+app.use('/ob', (req, res)=>{
+    // 요청이 들어 오면 응답 
+    res.send(PersonOB);
+})
+// http://localhost:3000/login/ary 요청
+app.use('/ary', (req, res)=>{
+    // 요청이 들어 오면 응답 
+    res.send(PersonAry);
+})
+
+//http://localhost:3000/ 요청
+app.use('/', async (req, res)=>{
+    res.send('root');
+    // 문자열 전송
+})
+
+//http://localhost:3000/login 요청
+app.use('/login', async (req, res)=>{
+    res.send('login');
+})
+```
+
+
+
+# redirect, error처리
+```
+const express = require('express');
+const path = require('path');
+const app = express();
+
+app.set( 'PORT', process.env.PORT ||  3000 );
+//app.use( '/views', path.join(__dirname, 'views'));
+
+app.listen( app.get('PORT'), ()=>{
+    console.log('server start');
+})
+// 요청 경로 '/' , 'views' 등을 생략할 수도 있고 
+app.use((req, res)=>{
+  // 요청이 들어오면 자동으로 미들웨어가 동작함 
+  console.log('express middleware');
+
+  // 미들웨어가 동작할 때 자동으로 이동
+  // res.redirect('http://www.naver.com');
+
+  // status()와 sendStatus()메소드를 사용하여 상태코드를 전송할 수도 있다.
+  // res.status(403).send('Forbidden');
+
+  // 코드만 파라미터로 전달할 수도 있고 
+  res.sendStatus(403);
+});
+```
+
 # static 미들웨어를 이용한 경로 설정
 특정 폴더의 파일들을 특정 패스로 접근할 수 있도록 만들어 준다. 
-
+그러나 express는 static도 가지고 있다. 
 ```
 // 예를 들어 public폴더에 있는 모든 파일을 웹서버의 루트 패스로 접근 할 수 있도록 만들고 싶다면 다음 2줄을 추가하면 된다.
 const static = require('serve-static');
@@ -492,8 +607,35 @@ npm install serve-static --save
 |express/public/css/style.css|http://localhost:3000/css/style.css|
 
 
+``` 
+// 아래와 같이 불편했던 path를 다음 예제 use에서 개선할 수 있고
+const express = require('express');
+const path = require('path');
+const app = express();
+app.set('PORT', process.env.PORT || 3000);
 
-``` public 단으로 분리
+/*
+브라우저 url 요청 
+http://localhost:3000/login
+http://localhost:3000/
+*/
+app.get('/', (req, res) => {
+    res.sendFile( path.join(__dirname, 'views') + req.url);
+    /// 불편했던 
+})
+
+app.get('/login', (req, res)=>{
+      res.sendFile(path.join(__dirname, 'views') + req.url + '.html');
+   // 불편했던 
+})
+
+app.listen( app.get('PORT'), ()=>{
+    console.log('server start');
+})
+```
+
+## serve-static path 개선
+```
 const express = require('express');
 const path = require('path');
 const app = express();
@@ -502,15 +644,10 @@ app.set('PORT', process.env.PORT || 3000);
 // path.join 효과적으로  
 const static = require('serve-static');
 app.use(static(path.join(__dirname, 'public')));
+app.use('/views', static(path.join(__dirname, 'views')));
 /*
-// 기본 경로 접근
-// http://localhost:3000/login.html 확장자 반드시 입력해야 함 
-*/
-
-app.use('/public', static(path.join(__dirname, 'public')));
-/*
-http://localhost:3000/public/
-http://localhost:3000/public/login.html
+http://localhost:3000/views/
+http://localhost:3000/views/login.html
 확장자 반드시 입력해야 함 
 */
 
@@ -519,7 +656,7 @@ app.listen( app.get('PORT'), ()=>{
 })
 
 app.get('/', (req, res)=>{
-        res.sendFile(req.url);
+    res.sendFile(req.url);
 })
 
 app.get('/login', (req, res)=>{
@@ -527,117 +664,111 @@ app.get('/login', (req, res)=>{
 })
 ```
 
-``` 
+## express는 serve-static 도 내장하고 있다. 
+http모듈을 사용했을 때는 if문을 사용해 라우팅을 구현했지만, express의 router미들웨어를 이용하면 더욱 쉽게 페이지 라우팅을 구현할 수 있다.
+// 저번 주 error 였던 부분 복습해서 보여 줄것 ?
+
+```
+const static = require('serve-static');
+//모듈을 읽어 오지 않아도 다음과 같이 처리할 수 있다. 
+app.use(express.static(path.join(__dirname, 'views')));
+app.use('/views', express.static(path.join(__dirname, 'views')));
+
+```
+```
 const express = require('express');
 const path = require('path');
 const app = express();
-const static = require('serve-static');
 app.set('PORT', process.env.PORT || 3000);
 
-// 등록 처리할 것 
-app.use(static(path.join(__dirname, 'views')));
-app.use('/views', static(path.join(__dirname, 'views')));
-// 굳이 path 모듈을 사용해서 사용하는 이유는? 
-// 맥과 윈도우에서 //나 \ 등으로 경로 구분자를 잘못 사용해도, 알아서 정상 경로로 변환해줌
+app.use(express.static(path.join(__dirname, '/views')));
+app.use('/views', express.static(path.join(__dirname, 'views')));
+
+app.listen( app.get('PORT'), ()=>{
+    console.log('server start' , app.get('PORT'));
+})
+```
+
+``` public 단으로 분리
+const express = require('express');
+const path = require('path');
+const app = express();
+app.set('PORT', process.env.PORT || 3000);
+
+// path.join 효과적으로  
+app.use(express.static(path.join(__dirname, 'public')));
+// 페이지 라우팅은 클라이언트의 요청에 따라 적절한 페이지로 응답하는 기술
 /*
-브라우저 url 요청 
-http://localhost:3000/login
-http://localhost:3000/login.html
-http://localhost:3000/
+// 기본 경로 접근
+// http://localhost:3000/login.html 확장자 반드시 입력해야 함 
 */
-app.get('/', (req, res) => {
-    console.log( req.url);
-    res.sendFile( path.join(__dirname, 'views') + req.url);
-})
 
-app.get('/login', (req, res)=>{
-   console.log( req.url + '.html');
-   res.sendFile(path.join(__dirname, 'views') + req.url + '.html');
-})
-
-app.listen( app.get('PORT'), ()=>{
-    console.log('server start');
-})
-```
-
-
-## use() 
-.get() 특정패스로 요청된 query를 실행하지만 use() 미들웨어를 사용하는 것임 
-노드에서는 웹 요청과 응답에 관한 정보를 사용해 필요한 처리를 진행할 수 있도록 함수를 분리하며 use()에 등록해 두면 클라이언트 요청에 따라 알아서 use()가 처리함
-```
-const express = require('express');
-const path = require('path');
-const app = express();
-
-app.set( 'PORT', process.env.PORT ||  3000 );
-//app.use( '/views', path.join(__dirname, 'views'));
+app.use('/public', express.static(path.join(__dirname, 'public')));
+//페이지 라우팅은 클라이언트의 요청에 따라 적절한 페이지로 응답하는 기술
+/*
+http://localhost:3000/public/
+http://localhost:3000/public/login.html
+확장자 반드시 입력해야 함 
+*/
+app.use('/views', express.static(path.join(__dirname, 'views')));
+// 경로설정 http://localhost:3000/views/login.html
+// 즉 내가 원하는 경로로 이동하기 편리함 
 
 app.listen( app.get('PORT'), ()=>{
-    console.log('server start');
-})
-
-// express 에서 사용하는 요청객체와 응답객체는 http 모듈에서 사용하는 객체와 같다. 
-app.use( '/login' , (req, res)=>{
-    // get() 요청과 달리 filter기능이 없어서 /먼저 구현하면 /login을 인식하지 못함
-    console.log('login');
-    res.send('login');
-    // html, buffer, JSON배열, JSON객체등 다양한 데이터 전송이 가능
-    // file을 직접 전송하진 않고 등록 해주면 get을 호출 하는 형식 
-})
-app.use( '/' , (req, res)=>{
-    console.log('root');
-    res.send('root')
+    console.log('server start' , app.get('PORT'));
 })
 ```
 
-## 1. get() : 익스프레스 요청과 응답
-|메소드 이름 |설명|
-|---|---|
-|send([body]) | 클라이언트에 응답을 보낸다. 데이터는 html, buffer, JSON배열, JSON객체|
-|status(code) | http 상태 코드를 반환 |
-|sendStatus(code) | http 상태 코드를 반환, 상태메시지와 함께 전송 |
-|redirect | 웹페이지 경로를 강제로 이동 |
-|render( view, [local], [callback]) | 뷰엔진을 사용하여 문서를 만든 후 전송 |
-
-
-## 상태코드 : status 리턴 종류
-|코드 |설명|
-|---|---|
-|200 | ok, 처리성공 |
-|401 | Unauthorized, 인증필요|
-|403 | Forbidden, 액세스 거부|
-|404 | Not Found, 리퀘스트된 자원이 존재하지 않음|
-|500 | Internal Server Error, 내부서버에러|
-|503 | Sevice Unavailable, 요구한 서버 이용불가|
-
+## express use는 세번째 매개변수로 next를 사용할 수 있다.
+유저 요청에 응답하기 전, 단계를 나눠 일을 처리할 수 있다. 
 
 ```
 const express = require('express');
-const path = require('path');
 const app = express();
+app.set( 'PORT' , process.env.PORT || 3000);
 
-app.set( 'PORT', process.env.PORT ||  3000 );
-//app.use( '/views', path.join(__dirname, 'views'));
-
-app.listen( app.get('PORT'), ()=>{
-    console.log('server start');
+//세번째 매개변수로 next를 사용할 수 있다.
+//유저 요청에 응답하기 전, 단계를 나눠 일을 처리할 수 있다. 
+app.use( function (req, res, next) {
+  req.numb = 2;
+  res.numb = 3;
+  console.log('첫번째 미들웨어 입니다.');
+  next();
 })
 
-app.use((req, res)=>{
-  // 요청이 들어오면 자동으로 미들웨어가 동작함 
-  console.log('express middleware');
+app.use( function (req, res, next) {
+  console.log('두번째 미들웨어 입니다.');
+  console.log(req.numb + ' + ' + res.numb + ' = ' + (req.numb + res.numb) );
+  // 재사용성도 제공하기 때문에 더욱 구조적이고 재사용성 높음
+  next();
+})
 
-  // 미들웨어가 동작할 때 자동으로 이동
-  // res.redirect('http://www.naver.com');
+app.use( function (req, res) {
+  console.log('세번째 미들웨어 입니다.');
+  res.sendStatus(200);
+  res.end();
+})
 
-  // status()와 sendStatus()메소드를 사용하여 상태코드를 전송할 수도 있다.
-  // res.status(403).send('Forbidden');
-
-  // 코드만 파라미터로 전달할 수도 있고 
-  res.sendStatus(403);
-
-});
+app.listen(app.get('PORT'), function() {
+  console.log(`Server is Running at ${app.get('PORT')}`);
+})
 ```
+
+```
+# express 미들웨어
+express는 개발자가 다양한 기능을 사용할 수 있도록 미리 만들어 둔 여러가지 미들웨어를 제공
+페이지 라우팅은 클라이언트의 요청에 따라 적절한 페이지로 응답하는 기술
+|모듈|설명|
+|---|---|
+|static| 특정폴더의 파일들을 특정 패스로 접근할 수 있도록 만들어 준다.|
+|body-parser||
+|router||
+|cookie-parser||
+|express-session||
+
+# static
+특정폴더의 파일들을 특정 패스로 접근할 수 있도록 만들어 준다.
+public 폴더에 있느 모든 파일을 웹서버의 루트 패스로 접근할 수 있도록 만들고 싶을때 사용
 
 # 데이터 전송 방식 
 1. GET 
@@ -656,21 +787,9 @@ app.use((req, res)=>{
 ```
 const express = require('express');
 const app = express();
+app.set( 'PORT' , process.env.post || 3000);
 
-// 다음의 1, 2번 use 순서에 따라 실행 결과는 달라짐 
-// 1.
-// 요청 파라미터 =>  http://lcocalhost:3000?name=kim 
-app.use('/*',(req, res)=>{
-    // 미들웨어 동작
-    const userAgent = req.header('User-Agent');
-    const paramName = req.query.name;
-    console.log(paramName);
-    // res.send(`<div>userAgent = ${userAgent}</div>`);
-    // res.send(`<div>paramName = ${paramName}</div>`);
-     res.send(`userAgent = ${userAgent}   paramName = ${paramName}`);
-});
-
-// 2. 1번과 무슨 차이?
+// 2. 이요청을 아래로 내리면 동작하지 않음 
 // 요청 파라미터 =>  http://lcocalhost:3000?name=kim 
 app.use((req, res)=>{
     // 미들웨어 동작
@@ -680,6 +799,20 @@ app.use((req, res)=>{
     // res.writeHead('200', {'Content-Type' : 'text/html;charset=utf-8'});
     console.log(`userAgent = ${userAgent}`);
     console.log(`paramName = ${paramName}`);
+	//// 요청이 들어올때마다 자동으로 호출됨
+	// 콘솔창에도 내용을 뿌림
+});
+// 다음의 1, 2번 use 순서에 따라 실행 결과는 달라짐 
+// 1.
+// 요청 파라미터 =>  http://lcocalhost:3000?name=kim 
+app.use('/*',(req, res)=>{
+    // 미들웨어 동작
+    const userAgent = req.header('User-Agent');
+    const paramName = req.query.name;
+   
+    // res.send(`<div>userAgent = ${userAgent}</div>`);
+    // res.send(`<div>paramName = ${paramName}</div>`);
+     res.send(`userAgent = ${userAgent}   paramName = ${paramName}`);
 });
 
 app.listen(app.get('PORT'), function(){
@@ -687,6 +820,192 @@ app.listen(app.get('PORT'), function(){
 });
 
 ```
+
+# post 방식 : route 분리전 
+```
+const express = require('express')
+const app = express()
+app.set( 'PORT' , process.env.post || 3000);
+
+app.use(express.json())
+app.use(express.urlencoded({extended:false}));
+
+app.get('/', (req,res) => {
+  res.send(`
+    <form action="/" method="post">
+        userid : <input type="text" name="id" id="id"/> <br />
+        email : <input type="text" name="email" id="email"/> <br />
+        password : <input type="text" name="password" id="password"/> <br />
+        <input type="submit">
+    </form>
+  `)
+})
+
+app.post('/', (req,res)=> {
+  var name = req.body.id;
+  var email = req.body.email;
+
+  res.send(`Hi ${name}, your email is ${email}`)
+})
+
+app.listen(app.get('PORT'), function(){
+  console.log('Express server listening on port ' + app.get('PORT'));
+});
+```
+
+# post 라우트 분리 후 : body-parser 모듈 사용
+
+```
+const express = require('express');
+const app = express();
+const path = require('path');
+app.set( 'PORT' , process.env.post || 3000);
+const bodyPaser = require('body-parser');
+
+
+app.use(bodyPaser.json())
+// body-parser를 대신 express 이용해 application/json 파싱
+app.use(bodyPaser.urlencoded({ extended: false }))
+// body-parser를 대신 express로 application/x-www-form-urlencoded 파싱
+app.use(express.static(path.join(__dirname)));
+
+app.get('/', (req,res) => {
+  res.sendFile(req.url)
+})
+app.post('/', (req,res)=> {
+	var name = req.body.id;
+	res.send(`${name}님, 반갑습니다.`);
+  });
+app.listen(app.get('PORT'), function(){
+  console.log('Express server listening on port ' + app.get('PORT'));
+});
+
+```
+
+# route 분리 : body-parser 모듈 대신 express 사용
+```
+const express = require('express');
+const path = require('path');
+const app = express()
+app.set( 'PORT' , process.env.post || 3000);
+
+
+// body-parser를 대신 express로 application/x-www-form-urlencoded 파싱
+app.use(express.urlencoded({ extended: false }));
+// body-parser를 대신 express 이용해 application/json 파싱
+app.use(express.json());
+app.use(express.static(path.join(__dirname)));
+// path 개선
+
+app.get('/', (req,res) => {
+  res.sendFile( req.url);
+})
+app.post('/', (req,res)=> {
+	var name = req.body.id;
+	res.send(`${name}님, 반갑습니다.`);
+})
+
+app.listen(app.get('PORT'), function(){
+  console.log('Express server listening on port ' + app.get('PORT'));
+});
+```
+
+
+```
+const express = require('express')
+const app = express()
+const path = require('path');
+const static = require('serve-static');
+
+// http://localhost:3000/userCheck_post.html
+app.use(static(path.join(__dirname, '/views')))
+app.use(express.json())
+app.use(express.urlencoded({extended:false}));
+
+app.get('/', (req,res) => {
+  // 분리된 userCheck_post.html 을 views 폴더 안에 만들기
+  res.sendFile( req.url);
+})
+
+app.post('/', (req,res)=> {
+  var name = req.body.name;
+  var email = req.body.email;
+  res.send(`Hi ${name}, your email is ${email}`)
+})
+
+app.listen(3000, function() {
+  console.log("start");
+})
+```
+
+
+# 자동 라우트
+```
+const express = require('express');
+const app = express();
+app.set('PORT', process.env.PORT || 3000);
+
+const routerMobile = express.Router();
+const routerDesktop = express.Router();
+
+routerMobile.get('/index', function (req, res) {
+  res.send('<h1>router Mobile</h1>');
+})
+
+routerDesktop.get('/index', function (req, res) {
+  res.send('<h1>router Desktop</h1>');
+})
+
+app.use('/mobile', routerMobile);
+app.use('/desktop', routerDesktop);
+// localhost:3000/mobile/index
+// localhost:3000/desktop/index
+
+app.listen(app.get('PORT'), function () {
+  console.log(`server is Running at ${app.get('PORT')}`);
+})
+```
+
+# 라우트 파일 분리
+```
+// rounte.js
+const express = require('express');
+
+const routerMobile = express.Router();
+const routerDesktop = express.Router();
+
+routerMobile.get('/index', function (req, res) {
+  res.send('<h1>router Mobile</h1>');
+})
+
+routerDesktop.get('/index', function (req, res) {
+  res.send('<h1>router Desktop</h1>');
+})
+
+exports.routerMobile = routerMobile;
+exports.routerDesktop = routerDesktop;
+```
+```
+//  app.js
+const express = require('express');
+const app = express();
+app.set('PORT', process.env.PORT || 3000);
+
+app.use('/mobile', require('./router').routerMobile);
+app.use('/desktop', require('./router').routerDesktop);
+
+//app.use('/mobile', routerMobile);
+//app.use('/desktop', routerDesktop);
+// localhost:3000/mobile/index
+// localhost:3000/desktop/index
+
+app.listen(app.get('PORT'), function () {
+  console.log(`server is Running at ${app.get('PORT')}`);
+})
+
+
+# body-parser
+버전에 따라 최근은 express로 직접 접근 
 #  use를 사용한 로그인 확인 
 
 /**
@@ -741,91 +1060,6 @@ app.listen(app.get('PORT'), function(){
 });
 ```
 
-# post 방식 : route 분리전 
-```
-const express = require('express')
-const app = express()
-
-app.use(express.json())
-app.use(express.urlencoded({extended:false}));
-
-app.get('/', (req,res) => {
-  res.send(`
-    <form action="/" method="post">
-        userid : <input type="text" name="id" id="id"/> <br />
-        email : <input type="text" name="email" id="email"/> <br />
-        password : <input type="text" name="password" id="password"/> <br />
-        <input type="submit">
-    </form>
-  `)
-})
-
-app.post('/', (req,res)=> {
-  var body = req.body;
-  var name = body.id;
-  var email = body.email;
-
-  res.send(`Hi ${name}, your email is ${email}`)
-})
-
-app.listen(app.get('PORT'), function(){
-  console.log('Express server listening on port ' + app.get('PORT'));
-});
-```
-
-# post 라우트 분리 후 
-```
-const express = require('express')
-const app = express()
-const path = require('path');
-const static = require('serve-static');
-
-// http://localhost:3000/userCheck_post.html
-app.use(static(path.join(__dirname, '/views')))
-app.use(express.json())
-app.use(express.urlencoded({extended:false}));
-
-app.get('/', (req,res) => {
-  // 분리된 userCheck_post.html 을 views 폴더 안에 만들기
-  res.sendFile( req.url);
-})
-
-app.post('/', (req,res)=> {
-  var name = req.body.name;
-  var email = req.body.email;
-  res.send(`Hi ${name}, your email is ${email}`)
-})
-
-app.listen(3000, function() {
-  console.log("start");
-})
-```
-
-#  app.use에 등록한 자동 라우트 확인
-#  꼭 git 업로드 아니고 다운로드한 파일 install ? 되지 않나?
-
-
-
-# express 미들웨어
-express는 개발자가 다양한 기능을 사용할 수 있도록 미리 만들어 둔 여러가지 미들웨어를 제공
-|||
-|---|---|
-|static| 특정폴더의 파일들을 특정 패스로 접근할 수 있도록 만들어 준다.|
-|body-parser||
-|body-parser||
-|router||
-|cookie-parser||
-|express-session||
-
-# static
-특정폴더의 파일들을 특정 패스로 접근할 수 있도록 만들어 준다.
-public 폴더에 있느 모든 파일을 웹서버의 루트 패스로 접근할 수 있도록 만들고 싶을때 사용
-
-
-# body-parser
-버전에 따라 최근은 express로 직접 접근 
-
-
 
 # 요청 파라미터 
 
@@ -856,6 +1090,14 @@ app.use(cookieParser()); // 미들웨어 등록
 
 
 # 라우트 분리 
+페이지 라우팅은 클라이언트의 요청에 따라 적절한 페이지로 응답하는 기술
+|메서드|	설명|
+|get(path, callback, callback...)|	GET 요청이 발생했을 때의 이벤트 리스너|
+|post(path, callback, callback...)|	POST 요청이 발생했을 때의 이벤트 리스너|
+|put(path, callback, callback...) |	put 요청이 발생했을 때의 이벤트 리스너 |
+|delete(path, callback, callback...)|	delete 요청이 발생했을 때의 이벤트 리스너|
+|all(path, callback, callback...)|	all 요청이 발생했을 때의 이벤트 리스너|
+
 ```
 const express = require('express');
 const path = require('path');
