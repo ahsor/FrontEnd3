@@ -12,7 +12,28 @@
    <form action="/" method="post">
     이름: <input type="text" name="id" id="id" placeholder="이름"/> 
     <input type="submit">
+    <input type="submit" name="position" value="문과생"> <input type="submit" name="position" value="이과생">
+
     </form>
+    <div id="myBox"></div>
+   <script>
+
+        window.onload = function(){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/');
+            xhr.onreadystatechange = function(){
+                if(xhr.readyState == 4 && xhr.status==200){
+                    console.log(xhr.readyState + " : "  +xhr.status)
+                    //console.log(xhr.responseText + '00');
+                    xhr.send();
+                
+                }
+               
+            }
+           
+        }
+        
+   </script>
    
 </form>
 </body>

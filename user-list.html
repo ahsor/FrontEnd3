@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="rDiv"></div>
+    <script>
+        window.onload = function(){
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET','/');
+            //xhr.open('GET','http://localhost');
+            // 서버의 get 경로 /와 맞추어야 함
+            xhr.onreadystatechange = function(){
+                var res = JSON.parse(xhr.responseText);
+                var html = '<ul>';
+                for( var user of res){
+                    // user는 아무변수
+                    html += `<li>번호 : ${user.ui_num}, 아이디 :${user.ui_id}`;
+                }
+                html += '</ul>';
+                document.querySelector('#rDiv').innerHTML = html;
+            }
+            xhr.send();
+        }
+    </script>
+</body>
+</html>

@@ -39,6 +39,7 @@
     "ipaddr.js": "^1.9.1",
     "is-fullwidth-code-point": "^3.0.0",
     "logger": "^0.0.1",
+    "mariadb": "^2.5.5",
     "media-typer": "^0.3.0",
     "merge-descriptors": "^1.0.1",
     "methods": "^1.1.2",

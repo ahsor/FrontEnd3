@@ -9,10 +9,38 @@
 <body>
     <h1>current login</h1>
     <form action="/" method="post">
-        userid : <input type="text" name="id" id="id"/> <br />
-        email : <input type="text" name="email" id="email"/> <br />
+        userid : <input type="text" name="id" id="id" onchange="changeValue('id', this.value)"/> <br />
+        email : <input type="text" name="email" id="email" onchange="changeValue('email', this.value)"/> <br />
         password : <input type="text" name="password" id="password"/> <br />
-        <input type="submit">
-        </form>
+        <input type="submit" onclick="login()">
+    </form>
+    <div id="myBox"></div>
+<script>
+function changeValue( variable, value){
+            window[variable] = value;
+            console.log(window[variable]);
+        }
+
+function login(){
+    
+    var param = {
+                id:id,
+                email:email
+            };
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/login');
+    xhr.onreadystatechange = function(){
+        if(xhr.readyState ==4 && xhr.status==200){
+            console.log(xhr.readyState + " : "  +xhr.status)
+            console.log(xhr.responseText + '00');
+        }
+    }
+    //xhr.setRequestHeader('content-type', 'application/json');
+    //xhr.send(JSON.stringify(param));
+    document.querySelector('#myBox').innerHTML = `${param.id}님 ${param.email} 입니다.`;
+}
+</script>  
+
 </body>
 </html>
